@@ -1,5 +1,6 @@
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
@@ -17,6 +18,12 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable {
     @FXML
     private GridPane pane;
+    @FXML
+    private GridPane paneSerie;
+    @FXML
+    private TabPane tab;
+    @FXML
+    private AnchorPane root;
     public Medie m;
     private static ArrayList<Medie> arr;
     private static String str;
@@ -68,34 +75,67 @@ public class Controller implements Initializable {
 
     @FXML
     private void initialize() throws FileNotFoundException {
-        int x = 0;
+        int x = 1;
         int y = 3;
 
-        ColumnConstraints column1 = new ColumnConstraints();
-        column1.setPercentWidth(100);
-        pane.getColumnConstraints().add(column1);
+//        ColumnConstraints column1 = new ColumnConstraints();
+//        column1.setPercentWidth(100);
+//        pane.getColumnConstraints().add(column1);
+        root.setLeftAnchor(pane, 0.0);
+        root.setRightAnchor(pane, 0.0);
 
         for(Medie m : arr){
-            FileInputStream fl = new FileInputStream("src\\filmplakater\\"+m.getTitle()+".jpg");
-            Image image = new Image(fl);
+            if(m instanceof Movie){
+                FileInputStream fl = new FileInputStream("src\\filmplakater\\"+m.getTitle()+".jpg");
+                Image image = new Image(fl);
 
-            ImageView imgTest = new ImageView(image);
-            //imgTest.setFitHeight(100);
-           // imgTest.setFitWidth(70);
+                ImageView imgTest = new ImageView(image);
+                //imgTest.setFitHeight(100);
+                //imgTest.setFitWidth(70);
 
-            imgTest.setImage(image);
+                imgTest.setImage(image);
 
-            pane.add(imgTest,x,y);
-            x++;
-            //y++;
-            if(x==5){
-                y++;
-                x=0;
+                pane.add(imgTest,x,y);
+                x++;
+                //y++;
+                if(x==5){
+                    y++;
+                    x=0;
+                }
+                if(x==5&&y==7){
+                    continue;
+                }
             }
-            if(x==5&&y==7){
-                continue;
-            }
+        }
+    }
 
+    @FXML
+    private void initializeSerie() throws FileNotFoundException {
+        int x = 1;
+        int y = 3;
+
+        root.setLeftAnchor(pane, 0.0);
+        root.setRightAnchor(pane, 0.0);
+
+        for(Medie m : arr){
+            if(m instanceof Serie){
+                FileInputStream fl = new FileInputStream("src\\serieforsider\\"+m.getTitle()+".jpg");
+                Image image = new Image(fl);
+
+                ImageView imgTest = new ImageView(image);
+
+                imgTest.setImage(image);
+                paneSerie.add(imgTest,x,y);
+                x++;
+                //y++;
+                if(x==5){
+                    y++;
+                    x=0;
+                }
+                if(x==5&&y==7){
+                    continue;
+                }
+            }
         }
     }
 
@@ -105,12 +145,13 @@ public class Controller implements Initializable {
         loadFileMovie();
         loadFileSerie();
         System.out.println(m.getTitle());
-
+        System.out.println();
         try {
             initialize();
+            initializeSerie();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        clipChildren(pane);
+        //clipChildren(pane);
     }
 }
