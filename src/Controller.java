@@ -30,8 +30,6 @@ public class Controller implements Initializable {
 
     public void loadFileMovie() {
         //inistatitere felter
-        arr = new ArrayList<Medie>();
-
         try (BufferedReader br = new BufferedReader(new FileReader("src\\film.txt"))) //åbner fil og begynder at læse igennem
         {
             String[] line = null;
@@ -114,11 +112,12 @@ public class Controller implements Initializable {
         int x = 1;
         int y = 3;
 
-        root.setLeftAnchor(pane, 0.0);
-        root.setRightAnchor(pane, 0.0);
+        root.setLeftAnchor(paneSerie, 0.0);
+        root.setRightAnchor(paneSerie, 0.0);
 
         for(Medie m : arr){
             if(m instanceof Serie){
+                System.out.println("Serie");
                 FileInputStream fl = new FileInputStream("src\\serieforsider\\"+m.getTitle()+".jpg");
                 Image image = new Image(fl);
 
@@ -142,10 +141,11 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        arr = new ArrayList<Medie>();
+
         loadFileMovie();
         loadFileSerie();
         System.out.println(m.getTitle());
-        System.out.println();
         try {
             initialize();
             initializeSerie();

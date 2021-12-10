@@ -15,7 +15,7 @@
         <tabs>
           <Tab fx:id="tabMovie" text="Movie">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <AnchorPane fx:id="rootMovie" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <ScrollPane fx:id="scrollPane" pannable="true" prefHeight="771.2" prefWidth="1280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <content>
@@ -45,7 +45,7 @@
           </Tab>
           <Tab fx:id="tabSerie" text="Serie">
             <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+              <AnchorPane fx:id="rootSerie" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
                         <ScrollPane fx:id="scrollSerie" pannable="true" prefHeight="771.2" prefWidth="1280.0">
                            <content>
