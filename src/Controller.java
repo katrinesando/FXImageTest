@@ -6,6 +6,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Popup;
 
 import java.io.*;
@@ -14,83 +15,32 @@ import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-    @FXML
-    private GridPane pane;
-    @FXML
-    private GridPane paneMyList;
-    @FXML
-    private GridPane paneUsers;
-    @FXML
-    private ScrollPane scrollPane;
-    @FXML
-    private GridPane paneSerie;
-    @FXML
-    private Pane userPane;
-    @FXML
-    private Button btn;
-    @FXML
-    private TabPane tab;
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private TextField username;
-    @FXML
-    private TextField age;
-    @FXML
-    private TextField searchBar;
-    @FXML
-    private Button changeButton;
-    @FXML
-    private Button refreshButton;
-    @FXML
-    private Button searchButton;
-    @FXML
-    private ToolBar toolBar;
-    @FXML
-    private Button changeUserButton;
+    @FXML private GridPane pane,paneMyList,paneUsers,paneSerie,paneNewUser;
+    @FXML private ScrollPane scrollPane;
+    @FXML private Pane userPane;
+    @FXML private TabPane tab;
+    @FXML private AnchorPane root;
+    @FXML private TextField username,age,searchBar;
+    @FXML private Text noGenreError,noSearchMovieError,noSearchSerieError,EmptyMyListError;
+    @FXML private Button changeButton,refreshButton,searchButton,changeUserButton,btn;
+    @FXML private ToolBar toolBar;
+    @FXML private MenuItem adventureItem,biographyItem,crimeItem,comedyItem,dramaItem,familyItem,fantasyItem,filmNoirItem,historyItem,
+            horrorItem,musicalItem,musicItem,mysteryItem,romanceItem,sciFiItem,sportItem,thrillerItem,warItem,westernItem;
 
     public Medie m;
-    public User user;
     private static ArrayList<Medie> arr;
     private static String str;
-    private static ArrayList<Medie> myList;
+    private static ArrayList<Medie> myList,searchListMovie,searchListSerie;
     private static ArrayList<Medie> searchList;
-    private static ArrayList<ImageView> movieImages;
-    private static ArrayList<ImageView> serieImages;
+    private static ArrayList<ImageView> images;
+    private int userAmount = 0,x=0;
+    private static ArrayList<Button> newUsersBtn;
+    public Alert alert;
+    private User user;
+    private FileManagement filemangement;
     //private static ArrayList<User> users;
 
-    public void loadFileMovie() {
-        //inistatitere felter
-        try (BufferedReader br = new BufferedReader(new FileReader("src/film.txt"))) //åbner fil og begynder at læse igennem
-        {
-            String[] line = null;
-            //kører hele fil igennem indtil der ikke er mere og tilføjer dem til array
-            while ((str = br.readLine()) != null) {
-                line = str.trim().split(";");
-                m = new Movie(line[0], line[1], line[2], line[3]);
-                arr.add(m);
-            }
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void loadFileSerie() {
-        try (BufferedReader br = new BufferedReader(new FileReader("src/serier.txt"))) //åbner fil og begynder at læse igennem
-        {
-            String[] line = null;
-            //kører hele fil igennem indtil der ikke er mere og tilføjer dem til array
-            while ((str = br.readLine()) != null) {
-                line = str.trim().split(";");
-                m = new Serie(line[0], line[1], line[2], line[3], line[4]);
-                arr.add(m);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @FXML
     private void initializeMovie() throws FileNotFoundException {
@@ -98,7 +48,7 @@ public class Controller implements Initializable {
         int y = 3;//3 virker
 
         ImageView img = new ImageView();
-        movieImages = new ArrayList<>();
+
         for (Medie m : arr) {
             if (m instanceof Movie) {
                 FileInputStream fl = new FileInputStream("src/filmplakater/" + m.getTitle() + ".jpg");
@@ -106,7 +56,7 @@ public class Controller implements Initializable {
 
                 img = new ImageView(image);
                 img.setImage(image);
-                movieImages.add(img);
+                images.add(img);
                 pane.add(img, x, y);
                 x++;
                 //y++;
@@ -125,7 +75,7 @@ public class Controller implements Initializable {
         int y = 3;
 
         ImageView img = new ImageView();
-        serieImages = new ArrayList<>();
+
         for (Medie m : arr) {
             if (m instanceof Serie) {
                 FileInputStream fl = new FileInputStream("src/serieforsider/" + m.getTitle() + ".jpg");
@@ -133,7 +83,7 @@ public class Controller implements Initializable {
 
                 img = new ImageView(image);
                 img.setImage(image);
-                serieImages.add(img);
+                images.add(img);
                 paneSerie.add(img, x, y);
                 x++;
                 if (x == 10) {
@@ -147,16 +97,37 @@ public class Controller implements Initializable {
 
     @FXML
     private void userBtn() throws FileNotFoundException {
-        user = new User(username.getText(),age.getText());
-
-        userPane.setVisible(false);
-        tab.setVisible(true);
-        toolBar.setVisible(true);
-        //users.add(new User((username.getText()),(age.getText())));
+        //tjekker om username er empty
+        if(username.getText().isEmpty()){
+            alert.setContentText("Username can't be empty");
+            alert.setAlertType(Alert.AlertType.WARNING);
+            alert.show();
+        }else{
+            //tilføjer user
+            if(userAmount<4){
+                user = new User(username.getText(),age.getText());
+                Button newUser = new Button();
+                paneNewUser.add(new Button(user.getName()),x,0);
+                newUsersBtn.add(newUser);
+                newUser.setVisible(false);
+                x++;userAmount++;
+            }else{//hvis der er flere end 4 user
+                alert.setAlertType(Alert.AlertType.ERROR);
+                alert.show();
+            }
+            if(!alert.isShowing()){ //går kun videre, hvis alert ikke er vidst
+                userPane.setVisible(false);
+                tab.setVisible(true);
+                toolBar.setVisible(true);
+            }
+        }
     }
 
     @FXML
     private void changeUser() throws FileNotFoundException {
+        for(Button b : newUsersBtn){
+            b.setVisible(true);
+        }
         tab.setVisible(false);
         userPane.setVisible(true);
         toolBar.setVisible(false);
@@ -167,56 +138,62 @@ public class Controller implements Initializable {
 
         int x = 0;//1 virker
         int y = 0;//3 virker
-        //tilføjer en masse tilfældeige medier til MyList
-        myList.add(arr.get(1));
-        myList.add(arr.get(14));
-        myList.add(arr.get(27));
-        myList.add(arr.get(40));
-        myList.add(arr.get(102));
-        myList.add(arr.get(150));
-        myList.add(arr.get(170));
-
+        if(myList.isEmpty()){
+            EmptyMyListError.setVisible(true);
+        }
         for (Medie m : myList) {
             if (m instanceof Movie) {
                 FileInputStream fl = new FileInputStream("src/filmplakater/" + m.getTitle() + ".jpg");
                 Image image = new Image(fl);
 
-                ImageView imgTest = new ImageView(image);
-                imgTest.setImage(image);
-
-                paneMyList.add(imgTest, x, y);
+                ImageView img = new ImageView(image);
+                img.setImage(image);
+                images.add(img);
+                paneMyList.add(img, x, y);
                 x++;
                 //y++;
                 if (x == 10) {
                     y++;
                     x = 0;
                 }
+                getInfo(img,m);
             }
             if (m instanceof Serie) {
                 FileInputStream fl = new FileInputStream("src/serieforsider/" + m.getTitle() + ".jpg");
                 javafx.scene.image.Image image = new Image(fl);
 
-                javafx.scene.image.ImageView imgTest = new javafx.scene.image.ImageView(image);
-                imgTest.setImage(image);
-                paneMyList.add(imgTest, x, y);
+                javafx.scene.image.ImageView img = new javafx.scene.image.ImageView(image);
+                img.setImage(image);
+                images.add(img);
+                paneMyList.add(img, x, y);
                 x++;
-                //y++;
                 if (x == 10) {
                     y++;
                     x = 0;
                 }
+                getInfo(img,m);
             }
         }
+
+
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        //initialisere felter
         arr = new ArrayList<Medie>();
         myList = new ArrayList<Medie>();
-        loadFileMovie();
-        loadFileSerie();
+        images = new ArrayList<>();
+        newUsersBtn = new ArrayList<>();
+        alert = new Alert(Alert.AlertType.NONE);
+        filemangement = new FileManagement();
+        arr = filemangement.loadFile();
+
         //System.out.println(m.getTitle());
         try {
+            noGenreError.setVisible(false);
+            noSearchSerieError.setVisible(false);
+            noSearchMovieError.setVisible(false);
             toolBar.setVisible(false);
             initializeMovie();
             initializeSerie();
@@ -228,54 +205,78 @@ public class Controller implements Initializable {
     }
 
     public void searchInput() throws FileNotFoundException {
-        searchList = new ArrayList<>();
-        pane.getChildren().removeAll(movieImages); //fjerner alle images fra gridpane
-        paneSerie.getChildren().removeAll(serieImages); //fjerner alle images fra gridpane
+        noGenreError.setVisible(false);
+        noSearchSerieError.setVisible(false);
+        noSearchMovieError.setVisible(false);
 
-        int x=0;
-        int y=3;
+        searchListMovie = new ArrayList<>();
+        searchListSerie = new ArrayList<>();
+        pane.getChildren().removeAll(images); //fjerner alle images fra gridpane
+        paneSerie.getChildren().removeAll(images); //fjerner alle images fra gridpane
 
         for (Medie m : arr) {
-            if (m.getTitle().toLowerCase().contains(searchBar.getText().toLowerCase())) {
-                searchList.add(m);
-            }
-        }
-        if(searchList.size()<7){
-            y=0;
-        }
-        for (Medie m : searchList) {
             if (m instanceof Movie) {
-                FileInputStream fl = new FileInputStream("src/filmplakater/" + m.getTitle() + ".jpg");
-                Image image = new Image(fl);
-
-                ImageView img = new ImageView(image);
-                img.setImage(image);
-                movieImages.add(img);
-
-                pane.add(img, x, y);
-                x++;
-                if (x == 10) {
-                    y++;
-                    x = 0;
+                if (m.getTitle().toLowerCase().contains(searchBar.getText().toLowerCase())) {
+                    searchListMovie.add(m);
                 }
             }
             if (m instanceof Serie) {
-                FileInputStream fl = new FileInputStream("src/serieforsider/" + m.getTitle() + ".jpg");
-                Image image = new Image(fl);
-
-                ImageView img = new ImageView(image);
-                img.setImage(image);
-                serieImages.add(img);
-                paneSerie.add(img, x, y);
-                x++;
-                //y++;
-                if (x == 10) {
-                    y++;
-                    x = 0;
+                if (m.getTitle().toLowerCase().contains(searchBar.getText().toLowerCase())) {
+                    searchListSerie.add(m);
                 }
             }
         }
+        int x = 0;
+        int y = 3;
+        if(searchListMovie.size()<20){
+            y=0;
+        }
+
+        if(searchListMovie.isEmpty()){
+            noSearchMovieError.setVisible(true);
+        }
+
+        for (Medie m : searchListMovie) {
+            FileInputStream fl = new FileInputStream("src/filmplakater/" + m.getTitle() + ".jpg");
+            Image image = new Image(fl);
+            ImageView img = new ImageView(image);
+            img.setImage(image);
+            images.add(img);
+            pane.add(img, x, y);
+            x++;
+            //y++;
+            if (x == 10) {
+                y++;
+                x = 0;
+            }
+            getInfo(img, m);
+        }
+        x = 0;
+        y = 3;
+        if(searchListSerie.size()<20){
+            y=0;
+        }
+        if(searchListSerie.isEmpty()){
+            noSearchSerieError.setVisible(true);
+        }
+
+        for (Medie m : searchListSerie) {
+            FileInputStream fl = new FileInputStream("src/serieforsider/" + m.getTitle() + ".jpg");
+            Image image = new Image(fl);
+            ImageView img = new ImageView(image);
+            img.setImage(image);
+            images.add(img);
+            paneSerie.add(img, x, y);
+            x++;
+            //y++;
+            if (x == 10) {
+                y++;
+                x = 0;
+            }
+            getInfo(img,m);
+        }
     }
+
 
     //pop-up window
     private void getInfo(ImageView imgTest,Medie m){
@@ -285,10 +286,13 @@ public class Controller implements Initializable {
             System.out.println("Tile pressed "+m.getTitle() + " --- "+m.getRating());
             // create a popup
             Popup popup = new Popup();
+            Button add = new Button("Add to List");
+            Button remove = new Button("Delete from List");
             Label lbl = new Label("Title: " +m.getTitle()
                     +'\n'+"Year: "+m.getYear()
                     +'\n'+"Genre: "+m.getGenre()
-                    +'\n'+"Rating: "+m.getRating());
+                    +'\n'+"Rating: "+m.getRating()
+                    +'\n'+"  ");
             lbl.setStyle(" -fx-background-color: white;");
             // set size of label
             lbl.setFont(myFont);
@@ -296,113 +300,169 @@ public class Controller implements Initializable {
             lbl.setMinHeight(100);
 
             popup.getContent().add(lbl);
-            //popup.getContent().add(popUpPane);
-            //popUpPane.setVisible(true);
+            popup.getContent().add(add);
+            popup.getContent().add(remove);
+            add.relocate(0,100);
+            remove.relocate(80,100);
+            //tilføjer event handler til button
+            btnMyList(add,remove,m);
             // set auto hide
             popup.setAutoHide(true);
             if (!popup.isShowing()){
                 System.out.println(scrollPane.getHeight());
                 System.out.println(scrollPane.getWidth());
-                popup.show(pane,(scrollPane.getHeight()),(scrollPane.getWidth()/3));
+//                popup.show();
+                popup.show(paneMyList,(scrollPane.getHeight()),(scrollPane.getWidth()/3));
             }
             event.consume();
         });
     }
+    private void btnMyList(Button add, Button remove,Medie m){
+        //tilføjer event handler til button
+        add.addEventHandler(MouseEvent.MOUSE_CLICKED, btnPressed -> {
+            try {
+                addMedie(m);
+                System.out.println(m.getTitle());
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            btnPressed.consume();
+        });
+        remove.addEventHandler(MouseEvent.MOUSE_CLICKED, btnPressed -> {
+            try {
+                removeMedie(m);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            btnPressed.consume();
+        });
+    }
     public void refreshSearch() throws FileNotFoundException {
+        noGenreError.setVisible(false);
+        noSearchSerieError.setVisible(false);
+        noSearchMovieError.setVisible(false);
+        pane.getChildren().removeAll(images); //fjerner alle images fra gridpane
+        paneSerie.getChildren().removeAll(images); //fjerner alle images fra gridpane
+        paneMyList.getChildren().removeAll(images); //fjerner alle images fra gridpane
+
         initializeMovie();
         initializeSerie();
+        initializeMyList();
     }
 
     public void searchGenre(String input) throws FileNotFoundException {
-        searchList = new ArrayList<>();
-        pane.getChildren().removeAll(movieImages); //fjerner alle images fra gridpane
-        paneSerie.getChildren().removeAll(serieImages); //fjerner alle images fra gridpane
-
-        int x = 0;
-        int y = 3;
+        noGenreError.setVisible(false);
+        noSearchSerieError.setVisible(false);
+        noSearchMovieError.setVisible(false);
+        searchListMovie = new ArrayList<>();
+        searchListSerie = new ArrayList<>();
+        pane.getChildren().removeAll(images); //fjerner alle images fra gridpane
+        paneSerie.getChildren().removeAll(images); //fjerner alle images fra gridpane
 
         for (Medie m : arr) {
-            if (m.getGenre().toLowerCase().contains(input.toLowerCase())) {
-                searchList.add(m);
-            }
-        }
-        if(searchList.size()<7){
-            y=0;
-        }
-        for (Medie m : searchList) {
             if (m instanceof Movie) {
-                FileInputStream fl = new FileInputStream("src/filmplakater/" + m.getTitle() + ".jpg");
-                Image image = new Image(fl);
-
-                ImageView img = new ImageView(image);
-                img.setImage(image);
-                movieImages.add(img);
-
-                pane.add(img, x, y);
-                x++;
-                //y++;
-                if (x == 10) {
-                    y++;
-                    x = 0;
+                if (m.getGenre().toLowerCase().contains(input.toLowerCase())) {
+                    searchListMovie.add(m);
                 }
             }
             if (m instanceof Serie) {
-                FileInputStream fl = new FileInputStream("src/serieforsider/" + m.getTitle() + ".jpg");
-                Image image = new Image(fl);
-
-                ImageView img = new ImageView(image);
-                img.setImage(image);
-                serieImages.add(img);
-                paneSerie.add(img, x, y);
-                x++;
-                //y++;
-                if (x == 10) {
-                    y++;
-                    x = 0;
+                if (m.getGenre().toLowerCase().contains(input.toLowerCase())) {
+                    searchListSerie.add(m);
                 }
             }
         }
+        int x = 0;
+        int y = 3;
+        if(searchListMovie.size()<20){
+            y=0;
+        }
+        for (Medie m : searchListMovie) {
+            FileInputStream fl = new FileInputStream("src/filmplakater/" + m.getTitle() + ".jpg");
+            Image image = new Image(fl);
+            ImageView img = new ImageView(image);
+            img.setImage(image);
+            images.add(img);
+            pane.add(img, x, y);
+            x++;
+            //y++;
+            if (x == 10) {
+                y++;
+                x = 0;
+            }
+            getInfo(img, m);
+        }
+
+        x = 0; y = 3;
+        if(searchListSerie.size()<20){
+            y=0;}
+
+        if(searchListSerie.isEmpty()){
+            noGenreError.setVisible(true);
+        }
+
+        for (Medie m : searchListSerie) {
+            FileInputStream fl = new FileInputStream("src/serieforsider/" + m.getTitle() + ".jpg");
+            Image image = new Image(fl);
+            ImageView img = new ImageView(image);
+            img.setImage(image);
+            images.add(img);
+            paneSerie.add(img, x, y);
+            x++;
+            //y++;
+            if (x == 10) {
+                y++;
+                x = 0;
+            }
+            getInfo(img,m);
+        }
     }
 
-    public void searchAdventure() throws FileNotFoundException {searchGenre( "Adventure");}
-    @FXML private MenuItem adventureItem;
-    public void searchBiography() throws FileNotFoundException {searchGenre( "Biography");}
-    @FXML private MenuItem biographyItem;
-    public void searchCrime() throws FileNotFoundException {searchGenre( "Crime");}
-    @FXML private MenuItem crimeItem;
-    public void searchComedy() throws FileNotFoundException {searchGenre( "Comedy");}
-    @FXML private MenuItem comedyItem;
-    public void searchDrama() throws FileNotFoundException {searchGenre( "Drama");}
-    @FXML private MenuItem dramaItem;
-    public void searchFamily() throws FileNotFoundException {searchGenre( "Family");}
-    @FXML private MenuItem familyItem;
-    public void searchFantasy() throws FileNotFoundException {searchGenre( "Fantasy");}
-    @FXML private MenuItem fantasyItem;
-    public void searchFilmNoir() throws FileNotFoundException {searchGenre( "Film-Noir");}
-    @FXML private MenuItem filmNoirItem;
-    public void searchHistory() throws FileNotFoundException {searchGenre( "History");}
-    @FXML private MenuItem historyItem;
-    public void searchHorror() throws FileNotFoundException {searchGenre( "Horror");}
-    @FXML private MenuItem horrorItem;
-    public void searchMusical() throws FileNotFoundException {searchGenre( "Musical");}
-    @FXML private MenuItem musicalItem;
-    public void searchMusic() throws FileNotFoundException {searchGenre( "Music");}
-    @FXML private MenuItem musicItem;
-    public void searchMystery() throws FileNotFoundException {searchGenre( "Mystery");}
-    @FXML private MenuItem mysteryItem;
-    public void searchRomance() throws FileNotFoundException {searchGenre( "Romance");}
-    @FXML private MenuItem romanceItem;
-    public void searchSciFi() throws FileNotFoundException {searchGenre( "Sci-fi");}
-    @FXML private MenuItem sciFiItem;
-    public void searchSport() throws FileNotFoundException {searchGenre( "Sport");}
-    @FXML private MenuItem sportItem;
-    public void searchThriller() throws FileNotFoundException {searchGenre( "Thriller");}
-    @FXML private MenuItem thrillerItem;
-    public void searchWar() throws FileNotFoundException {searchGenre( "War");}
-    @FXML private MenuItem warItem;
-    public void searchWestern() throws FileNotFoundException {searchGenre( "Western");}
-    @FXML private MenuItem westernItem;
+    public void addMedie(Medie m) throws FileNotFoundException {
+        if(!myList.contains(m)){
+            myList.add(m);}
+        else {
+            alert.setContentText("This medie is already on your list");
+            alert.setAlertType(Alert.AlertType.WARNING);
+            alert.show();
+        }
+        paneMyList.getChildren().removeAll(images);
+        EmptyMyListError.setVisible(false);
+        initializeMyList();
+    }
 
+    public void removeMedie(Medie m) throws FileNotFoundException {
+        if(myList.contains(m)){
+            myList.remove(m);}
+        else {
+            alert.setContentText("This medie isn't on your list");
+            alert.setAlertType(Alert.AlertType.WARNING);
+            alert.show();
+        }
+        paneMyList.getChildren().removeAll(images);
+        EmptyMyListError.setVisible(false);
+        initializeMyList();
+    }
+
+
+    public void searchAdventure() throws FileNotFoundException {searchGenre( "Adventure");}
+    public void searchBiography() throws FileNotFoundException {searchGenre( "Biography");}
+    public void searchCrime() throws FileNotFoundException {searchGenre( "Crime");}
+    public void searchComedy() throws FileNotFoundException {searchGenre( "Comedy");}
+    public void searchDrama() throws FileNotFoundException {searchGenre( "Drama");}
+    public void searchFamily() throws FileNotFoundException {searchGenre( "Family");}
+    public void searchFantasy() throws FileNotFoundException {searchGenre( "Fantasy");}
+    public void searchFilmNoir() throws FileNotFoundException {searchGenre( "Film-Noir");}
+    public void searchHistory() throws FileNotFoundException {searchGenre( "History");}
+    public void searchHorror() throws FileNotFoundException {searchGenre( "Horror");}
+    public void searchMusical() throws FileNotFoundException {searchGenre( "Musical");}
+    public void searchMusic() throws FileNotFoundException {searchGenre( "Music");}
+    public void searchMystery() throws FileNotFoundException {searchGenre( "Mystery");}
+    public void searchRomance() throws FileNotFoundException {searchGenre( "Romance");}
+    public void searchSciFi() throws FileNotFoundException {searchGenre( "Sci-fi");}
+    public void searchSport() throws FileNotFoundException {searchGenre( "Sport");}
+    public void searchThriller() throws FileNotFoundException {searchGenre( "Thriller");}
+    public void searchWar() throws FileNotFoundException {searchGenre( "War");}
+    public void searchWestern() throws FileNotFoundException {searchGenre( "Western");}
 
 }
 
